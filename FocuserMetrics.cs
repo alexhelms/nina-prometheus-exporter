@@ -31,6 +31,9 @@ namespace AlexHelms.NINA.PrometheusExporter
 
         public void UpdateDeviceInfo(FocuserInfo deviceInfo)
         {
+            if (!deviceInfo.Connected)
+                return;
+
             _name = deviceInfo.Name ?? "none";
             var labels = new[] { _name };
 

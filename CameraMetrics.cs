@@ -28,6 +28,9 @@ namespace AlexHelms.NINA.PrometheusExporter
 
         public void UpdateDeviceInfo(CameraInfo deviceInfo)
         {
+            if (!deviceInfo.Connected)
+                return;
+
             var labels = new[] { deviceInfo.Name ?? "none" };
 
             if (_options.EnableCameraMetrics)

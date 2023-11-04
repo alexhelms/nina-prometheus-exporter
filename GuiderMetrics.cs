@@ -27,6 +27,9 @@ namespace AlexHelms.NINA.PrometheusExporter
 
         public void UpdateDeviceInfo(GuiderInfo deviceInfo)
         {
+            if (!deviceInfo.Connected)
+                return;
+
             if (_options.EnableGuiderMetrics)
             {
                 RaRMS.Set(deviceInfo.RMSError?.RA.Arcseconds ?? double.NaN);

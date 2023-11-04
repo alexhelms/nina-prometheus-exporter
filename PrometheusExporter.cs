@@ -86,8 +86,6 @@ namespace AlexHelms.NINA.PrometheusExporter
                 {
                     Notification.ShowError($"Failed to start prometheus exporter server: {e.Message}");
                 }
-                
-                throw;
             }
 
             return base.Initialize();

@@ -32,6 +32,9 @@ namespace AlexHelms.NINA.PrometheusExporter
 
         public void UpdateDeviceInfo(TelescopeInfo deviceInfo)
         {
+            if (!deviceInfo.Connected)
+                return;
+
             var labels = new[] { deviceInfo.Name ?? "none" };
 
             if (_options.EnableMountMetrics)

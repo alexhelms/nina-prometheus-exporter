@@ -37,6 +37,9 @@ namespace AlexHelms.NINA.PrometheusExporter
 
         public void UpdateDeviceInfo(WeatherDataInfo deviceInfo)
         {
+            if (!deviceInfo.Connected)
+                return;
+
             if (_options.EnableWeatherMetrics)
             {
                 CloudCover.Set(deviceInfo.CloudCover);
