@@ -76,6 +76,15 @@
                         Orientation="Horizontal">
                 <TextBlock Width="150"
                            VerticalAlignment="Center"
+                           Text="Safety Metrics" />
+                <CheckBox Margin="12,0,0,0"
+                          IsChecked="{Binding Options.EnableSafetyMetrics}" />
+            </StackPanel>
+
+            <StackPanel Margin="0,8,0,0"
+                        Orientation="Horizontal">
+                <TextBlock Width="150"
+                           VerticalAlignment="Center"
                            Text="Weather Metrics" />
                 <CheckBox Margin="12,0,0,0"
                           IsChecked="{Binding Options.EnableWeatherMetrics}" />

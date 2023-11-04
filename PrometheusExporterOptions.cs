@@ -112,6 +112,17 @@ namespace AlexHelms.NINA.PrometheusExporter
             }
         }
 
+        public bool EnableSafetyMetrics
+        {
+            get => _options.GetValueBoolean(nameof(EnableSafetyMetrics), true);
+            set
+            {
+                _options.SetValueBoolean(nameof(EnableSafetyMetrics), value);
+                CoreUtil.SaveSettings(Settings.Default);
+                RaisePropertyChanged();
+            }
+        }
+
         public bool EnableWeatherMetrics
         {
             get => _options.GetValueBoolean(nameof(EnableWeatherMetrics), true);

@@ -323,6 +323,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="RotatorMetrics.cs" />
+    <Compile Include="SafetyMetrics.cs" />
     <Compile Include="WeatherMetrics.cs" />
   </ItemGroup>
   <ItemGroup>

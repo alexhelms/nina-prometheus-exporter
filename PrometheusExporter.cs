@@ -24,6 +24,7 @@ namespace AlexHelms.NINA.PrometheusExporter
         private readonly ImageMetadataMetrics _imageMetadataMetrics;
         private readonly MountMetrics _mountMetrics;
         private readonly RotatorMetrics _rotatorMetrics;
+        private readonly SafetyMetrics _safetyMetrics;
         private readonly WeatherMetrics _weatherMetrics;
 
         public PrometheusExporterOptions Options { get; }
@@ -37,6 +38,7 @@ namespace AlexHelms.NINA.PrometheusExporter
             IImageSaveMediator images,
             ITelescopeMediator mount,
             IRotatorMediator rotator,
+            ISafetyMonitorMediator safety,
             IWeatherDataMediator weather)
         {
             if (Settings.Default.UpdateSettings)
@@ -63,6 +65,7 @@ namespace AlexHelms.NINA.PrometheusExporter
             _imageMetadataMetrics = new ImageMetadataMetrics(images, Options);
             _mountMetrics = new MountMetrics(mount, Options);
             _rotatorMetrics = new RotatorMetrics(rotator, Options);
+            _safetyMetrics = new SafetyMetrics(safety, Options);
             _weatherMetrics = new WeatherMetrics(weather, Options);
         }
 
@@ -99,6 +102,7 @@ namespace AlexHelms.NINA.PrometheusExporter
             _imageMetadataMetrics.Dispose();
             _mountMetrics.Dispose();
             _rotatorMetrics.Dispose();
+            _safetyMetrics.Dispose();
             _weatherMetrics.Dispose();
             Options.Dispose();
 
