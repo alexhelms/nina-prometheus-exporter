@@ -1,6 +1,7 @@
 ﻿using NINA.Equipment.Equipment.MyGuider;
 using NINA.Equipment.Interfaces.Mediator;
 using Prometheus;
+using System;
 
 namespace AlexHelms.NINA.PrometheusExporter
 {
@@ -9,39 +10,55 @@ namespace AlexHelms.NINA.PrometheusExporter
         private readonly IGuiderMediator _guider;
         private readonly PrometheusExporterOptions _options;
 
-        private static readonly Gauge RaRMS = Metrics.CreateGauge("nina_guider_ra_rms", "Guider RA RMS error in arcsec.");
-        private static readonly Gauge DecRMS = Metrics.CreateGauge("nina_guider_dec_rms", "Guider DEC RMS error in arcsec.");
-        private static readonly Gauge TotalRMS = Metrics.CreateGauge("nina_guider_total_rms", "Guider total RMS error in arcsec.");
+        private static readonly Gauge RaError = Metrics.CreateGauge("nina_guider_ra", "Guider RA error in arcsec.");
+        private static readonly Gauge DecError = Metrics.CreateGauge("nina_guider_dec", "Guider DEC error in arcsec.");
+        private static readonly Gauge TotalError = Metrics.CreateGauge("nina_guider_total", "Guider total error in arcsec.");
+        private static readonly Histogram TotalErrorHisto = Metrics.CreateHistogram("nina_guider_total_histo", "Histogram of guider total error in arcsec.", new HistogramConfiguration
+        {
+            Buckets = Histogram.ExponentialBuckets(0.1, 1.1, 50),
+        });
+
+        private double _pixelScale = 1;
 
         public GuiderMetrics(IGuiderMediator guider, PrometheusExporterOptions options)
         {
             _guider = guider;
             _options = options;
             _guider.RegisterConsumer(this);
+            _guider.GuideEvent += OnGuideEvent;
         }
 
         public void Dispose()
         {
+            _guider.GuideEvent -= OnGuideEvent;
             _guider.RemoveConsumer(this);
+        }
+
+        private void OnGuideEvent(object sender, global::NINA.Core.Interfaces.IGuideStep e)
+        {
+            if (_options.EnableGuiderMetrics)
+            {
+                var ra = e.RADistanceRaw * _pixelScale;
+                var dec = e.DECDistanceRaw * _pixelScale;
+                var total = Math.Sqrt(ra * ra + dec * dec);
+
+                RaError.Set(ra);
+                DecError.Set(dec);
+                TotalError.Set(total);
+                TotalErrorHisto.Observe(total);
+            }
+            else
+            {
+                RaError.Unpublish();
+                DecError.Unpublish();
+                TotalError.Unpublish();
+                TotalErrorHisto.Unpublish();
+            }
         }
 
         public void UpdateDeviceInfo(GuiderInfo deviceInfo)
         {
-            if (!deviceInfo.Connected)
-                return;
-
-            if (_options.EnableGuiderMetrics)
-            {
-                RaRMS.Set(deviceInfo.RMSError?.RA.Arcseconds ?? double.NaN);
-                DecRMS.Set(deviceInfo.RMSError?.Dec.Arcseconds ?? double.NaN);
-                TotalRMS.Set(deviceInfo.RMSError?.Total.Arcseconds ?? double.NaN);
-            }
-            else
-            {
-                RaRMS.Unpublish();
-                DecRMS.Unpublish();
-                TotalRMS.Unpublish();
-            }
+            _pixelScale = deviceInfo.PixelScale;
         }
     }
 }
