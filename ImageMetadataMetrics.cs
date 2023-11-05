@@ -10,6 +10,7 @@ namespace AlexHelms.NINA.PrometheusExporter
         private readonly PrometheusExporterOptions _options;
 
         private static readonly string[] Labels = new[] { "target_name", "filter" };
+        private static readonly Gauge ImageScale = Metrics.CreateGauge("nina_image_scale", "Image scale in arcsec/px.", Labels);
         private static readonly Gauge ImageExposureTime = Metrics.CreateGauge("nina_image_exposure_time", "Image exposure time in seconds.", Labels);
         private static readonly Gauge ImageMean = Metrics.CreateGauge("nina_image_mean", "Image mean.", Labels);
         private static readonly Gauge ImageMedian = Metrics.CreateGauge("nina_image_median", "Image median.", Labels);
@@ -19,8 +20,8 @@ namespace AlexHelms.NINA.PrometheusExporter
         private static readonly Gauge ImageMinCount = Metrics.CreateGauge("nina_image_min_count", "Image minimum ADU count.", Labels);
         private static readonly Gauge ImageMax = Metrics.CreateGauge("nina_image_max", "Image maximum ADU.", Labels);
         private static readonly Gauge ImageMaxCount = Metrics.CreateGauge("nina_image_max_count", "Image maximum ADU count.", Labels);
-        private static readonly Gauge ImageHfr = Metrics.CreateGauge("nina_image_hfr", "Image HFR.", Labels);
-        private static readonly Gauge ImageHfrStdDev = Metrics.CreateGauge("nina_image_hfr_stddev", "Image HFR standard deviation.", Labels);
+        private static readonly Gauge ImageHfr = Metrics.CreateGauge("nina_image_hfr", "Image HFR in pixels.", Labels);
+        private static readonly Gauge ImageHfrStdDev = Metrics.CreateGauge("nina_image_hfr_stddev", "Image HFR standard deviation in pixels.", Labels);
         private static readonly Gauge ImageStarCount = Metrics.CreateGauge("nina_image_star_count", "Image star count.", Labels);
 
         public ImageMetadataMetrics(IImageSaveMediator images, PrometheusExporterOptions options)
@@ -46,6 +47,12 @@ namespace AlexHelms.NINA.PrometheusExporter
 
             if (_options.EnableImageMetadataMetrics)
             {
+                var pixelSize = e.MetaData.Camera.PixelSize;
+                var focalLength = e.MetaData.Telescope.FocalLength;
+                var binning = int.Parse(e.MetaData.Image.Binning.Substring(0, 1));  // Binning is like "1x1" or "2x2", asymmetric not supported.
+                var imageScale = pixelSize / focalLength * 57.29577951308 * 3600.0 / 1000.0 * binning;
+
+                ImageScale.WithLabels(labels).Set(imageScale);
                 ImageExposureTime.WithLabels(labels).Set(e.Duration);
 
                 if (e.Statistics != null)
