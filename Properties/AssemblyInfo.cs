@@ -23,7 +23,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCopyright("Copyright © 2023 Alex Helms")]
 
 // The minimum Version of N.I.N.A. that this plugin is compatible with
-[assembly: AssemblyMetadata("MinimumApplicationVersion", "2.3.0.9001")]
+[assembly: AssemblyMetadata("MinimumApplicationVersion", "3.0.0.2017")]
 
 // The license your plugin code is using
 [assembly: AssemblyMetadata("License", "MIT")]
@@ -57,7 +57,7 @@ Due to technical limitations, .NET Framework requires system permissions to run 
 To use this plugin you first must run the command as as admin:
 
 ```shell
-netsh http add urlacl url=http://+:9100/metrics user=User
+netsh http add urlacl url=http://+:9100/metrics user=%USERNAME%
 ```
 
 Be sure to set the correct port and username.
