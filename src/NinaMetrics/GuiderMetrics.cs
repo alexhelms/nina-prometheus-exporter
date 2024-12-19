@@ -12,7 +12,7 @@ public class GuiderMetrics : IGuiderConsumer
     private readonly IGuiderMediator _guider;
     private readonly PrometheusExporterOptions _options;
 
-    private static readonly Gauge RaErrorArcsec = Metrics.CreateGauge("nina_guider_ra_arcsec", "Guider RA error in arcsec.");
+    private static readonly Gauge RaErrorArcsec = Metrics.CreateGauge("nina_guider__ra_arcsec", "Guider RA error in arcsec.");
     private static readonly Gauge DecErrorArcsec = Metrics.CreateGauge("nina_guider_dec_arcsec", "Guider DEC error in arcsec.");
     private static readonly Gauge TotalErrorArcsec = Metrics.CreateGauge("nina_guider_total_arcsec", "Guider total error in arcsec.");
 
@@ -25,7 +25,7 @@ public class GuiderMetrics : IGuiderConsumer
         Buckets = Histogram.ExponentialBuckets(0.1, 1.1, 50),
     });
 
-    private static readonly Histogram TotalErrorHistoPixel = Metrics.CreateHistogram("nina_guider_total_arcsec_histo", "Histogram of guider total error in pixels.", new HistogramConfiguration
+    private static readonly Histogram TotalErrorHistoPixel = Metrics.CreateHistogram("nina_guider_total_pixel_histo", "Histogram of guider total error in pixels.", new HistogramConfiguration
     {
         Buckets = Histogram.ExponentialBuckets(0.01, 1.1, 50),
     });

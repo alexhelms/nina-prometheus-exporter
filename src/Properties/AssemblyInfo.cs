@@ -53,6 +53,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyMetadata("LongDescription", @"
 # Prometheus Exporter for NINA #
 Expose NINA metrics to prometheus.
+
+See the complete README on github at [https://github.com/alexhelms/nina-prometheus-exporter](https://github.com/alexhelms/nina-prometheus-exporter).
 ")]
 
 

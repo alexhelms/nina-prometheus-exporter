@@ -12,8 +12,8 @@ public class FocuserMetrics : IFocuserConsumer
     private readonly PrometheusExporterOptions _options;
 
     private static readonly string[] Labels = ["focuser_name"];
-    private static readonly Gauge Temperature = Metrics.CreateGauge("nina_focuser_temperature", "NINA focuser temperature in degrees C.", Labels);
-    private static readonly Gauge Position = Metrics.CreateGauge("nina_focuser_position", "NINA focuser position in steps.", Labels);
+    private static readonly Gauge Temperature = Metrics.CreateGauge("nina_focuser_temperature", "Focuser temperature in degrees C.", Labels);
+    private static readonly Gauge Position = Metrics.CreateGauge("nina_focuser_position", "Focuser position in steps.", Labels);
     private static readonly Counter Autofocus = Metrics.CreateCounter("nina_autofocus", "Number of autofocus runs.", Labels);
 
     private string _name = string.Empty;

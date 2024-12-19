@@ -21,7 +21,8 @@ public class ImageMetadataMetrics : IDisposable
     private static readonly Gauge ImageMinCount = Metrics.CreateGauge("nina_image_min_count", "Image minimum ADU count.", Labels);
     private static readonly Gauge ImageMax = Metrics.CreateGauge("nina_image_max", "Image maximum ADU.", Labels);
     private static readonly Gauge ImageMaxCount = Metrics.CreateGauge("nina_image_max_count", "Image maximum ADU count.", Labels);
-    private static readonly Gauge ImageHfr = Metrics.CreateGauge("nina_image_hfr", "Image HFR in pixels.", Labels);
+    private static readonly Gauge ImageHfrPixels = Metrics.CreateGauge("nina_image_hfr_pixels", "Image HFR in pixels.", Labels);
+    private static readonly Gauge ImageHfrArcsec = Metrics.CreateGauge("nina_image_hfr_arcsec", "Image HFR in arcsec.", Labels);
     private static readonly Gauge ImageHfrStdDev = Metrics.CreateGauge("nina_image_hfr_stddev", "Image HFR standard deviation in pixels.", Labels);
     private static readonly Gauge ImageStarCount = Metrics.CreateGauge("nina_image_star_count", "Image star count.", Labels);
 
@@ -81,13 +82,15 @@ public class ImageMetadataMetrics : IDisposable
 
             if (e.StarDetectionAnalysis != null)
             {
-                ImageHfr.WithLabels(labels).Set(Util.ReplaceNan(e.StarDetectionAnalysis.HFR));
+                ImageHfrPixels.WithLabels(labels).Set(Util.ReplaceNan(e.StarDetectionAnalysis.HFR));
+                ImageHfrArcsec.WithLabels(labels).Set(Util.ReplaceNan(e.StarDetectionAnalysis.HFR * imageScale));
                 ImageHfrStdDev.WithLabels(labels).Set(Util.ReplaceNan(e.StarDetectionAnalysis.HFRStDev));
                 ImageStarCount.WithLabels(labels).Set(Util.ReplaceNan(e.StarDetectionAnalysis.DetectedStars));
             }
             else
             {
-                ImageHfr.WithLabels(labels).Unpublish();
+                ImageHfrPixels.WithLabels(labels).Unpublish();
+                ImageHfrArcsec.WithLabels(labels).Unpublish();
                 ImageHfrStdDev.WithLabels(labels).Unpublish();
                 ImageStarCount.WithLabels(labels).Unpublish();
             }
@@ -104,7 +107,8 @@ public class ImageMetadataMetrics : IDisposable
             ImageMinCount.WithLabels(labels).Unpublish();
             ImageMax.WithLabels(labels).Unpublish();
             ImageMaxCount.WithLabels(labels).Unpublish();
-            ImageHfr.WithLabels(labels).Unpublish();
+            ImageHfrPixels.WithLabels(labels).Unpublish();
+            ImageHfrArcsec.WithLabels(labels).Unpublish();
             ImageHfrStdDev.WithLabels(labels).Unpublish();
             ImageStarCount.WithLabels(labels).Unpublish();
         }

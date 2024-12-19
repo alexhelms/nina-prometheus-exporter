@@ -12,8 +12,8 @@ public class RotatorMetrics : IRotatorConsumer
     private readonly PrometheusExporterOptions _options;
 
     private static readonly string[] Labels = ["rotator_name"];
-    private static readonly Gauge MechanicalPosition = Metrics.CreateGauge("nina_rotator_mechanical_position", "NINA rotator mechanical position in degrees.", Labels);
-    private static readonly Gauge SkyPosition = Metrics.CreateGauge("nina_rotator_position", "NINA rotator position in degrees.", Labels);
+    private static readonly Gauge MechanicalPosition = Metrics.CreateGauge("nina_rotator_mechanical_position", "Rotator mechanical position in degrees.", Labels);
+    private static readonly Gauge SkyPosition = Metrics.CreateGauge("nina_rotator_position", "Rotator position in degrees.", Labels);
 
     public RotatorMetrics(IRotatorMediator rotator, PrometheusExporterOptions options)
     {
