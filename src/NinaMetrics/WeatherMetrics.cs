@@ -1,8 +1,10 @@
-﻿using NINA.Equipment.Equipment.MyWeatherData;
+﻿using AlexHelms.NINA.PrometheusExporter;
+using NINA.Equipment.Equipment.MyWeatherData;
 using NINA.Equipment.Interfaces.Mediator;
 using Prometheus;
+using System;
 
-namespace AlexHelms.NINA.PrometheusExporter;
+namespace AlexHelms.NINA.Prometheusexporter.NinaMetrics;
 
 public class WeatherMetrics : IWeatherDataConsumer
 {
@@ -32,29 +34,27 @@ public class WeatherMetrics : IWeatherDataConsumer
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         _weather.RemoveConsumer(this);
     }
 
     public void UpdateDeviceInfo(WeatherDataInfo deviceInfo)
     {
-        if (!deviceInfo.Connected)
-            return;
-
-        if (_options.EnableWeatherMetrics)
+        if (_options.EnableWeatherMetrics && deviceInfo.Connected)
         {
-            CloudCover.Set(deviceInfo.CloudCover);
-            DewPoint.Set(deviceInfo.DewPoint);
-            Humidity.Set(deviceInfo.Humidity);
-            Pressure.Set(deviceInfo.Pressure);
-            RainRate.Set(deviceInfo.RainRate);
-            SkyBrightness.Set(deviceInfo.SkyBrightness);
-            SkyQuality.Set(deviceInfo.SkyQuality);
-            SkyTemperature.Set(deviceInfo.SkyTemperature);
-            StarFwhm.Set(deviceInfo.StarFWHM);
-            Temperature.Set(deviceInfo.Temperature);
-            WindDirection.Set(deviceInfo.WindDirection);
-            WindGust.Set(deviceInfo.WindGust);
-            WindSpeed.Set(deviceInfo.WindSpeed);
+            CloudCover.Set(Util.ReplaceNan(deviceInfo.CloudCover));
+            DewPoint.Set(Util.ReplaceNan(deviceInfo.DewPoint));
+            Humidity.Set(Util.ReplaceNan(deviceInfo.Humidity));
+            Pressure.Set(Util.ReplaceNan(deviceInfo.Pressure));
+            RainRate.Set(Util.ReplaceNan(deviceInfo.RainRate));
+            SkyBrightness.Set(Util.ReplaceNan(deviceInfo.SkyBrightness));
+            SkyQuality.Set(Util.ReplaceNan(deviceInfo.SkyQuality));
+            SkyTemperature.Set(Util.ReplaceNan(deviceInfo.SkyTemperature));
+            StarFwhm.Set(Util.ReplaceNan(deviceInfo.StarFWHM));
+            Temperature.Set(Util.ReplaceNan(deviceInfo.Temperature));
+            WindDirection.Set(Util.ReplaceNan(deviceInfo.WindDirection));
+            WindGust.Set(Util.ReplaceNan(deviceInfo.WindGust));
+            WindSpeed.Set(Util.ReplaceNan(deviceInfo.WindSpeed));
         }
         else
         {

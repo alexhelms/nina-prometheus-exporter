@@ -1,16 +1,17 @@
-﻿using NINA.Equipment.Equipment.MyFocuser;
+﻿using AlexHelms.NINA.PrometheusExporter;
+using NINA.Equipment.Equipment.MyFocuser;
 using NINA.Equipment.Interfaces.Mediator;
 using Prometheus;
+using System;
 
-namespace AlexHelms.NINA.PrometheusExporter;
+namespace AlexHelms.NINA.Prometheusexporter.NinaMetrics;
 
 public class FocuserMetrics : IFocuserConsumer
 {
     private readonly IFocuserMediator _focuser;
     private readonly PrometheusExporterOptions _options;
 
-    private static readonly string[] Labels = new[] { "focuser_name" };
-    private static readonly Gauge IsConnected = Metrics.CreateGauge("nina_focuser_connected", "NINA focuser connected indicator.", Labels);
+    private static readonly string[] Labels = ["focuser_name"];
     private static readonly Gauge Temperature = Metrics.CreateGauge("nina_focuser_temperature", "NINA focuser temperature in degrees C.", Labels);
     private static readonly Gauge Position = Metrics.CreateGauge("nina_focuser_position", "NINA focuser position in steps.", Labels);
     private static readonly Counter Autofocus = Metrics.CreateCounter("nina_autofocus", "Number of autofocus runs.", Labels);
@@ -26,26 +27,22 @@ public class FocuserMetrics : IFocuserConsumer
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         _focuser.RemoveConsumer(this);
     }
 
     public void UpdateDeviceInfo(FocuserInfo deviceInfo)
     {
-        if (!deviceInfo.Connected)
-            return;
-
         _name = deviceInfo.Name ?? "none";
         var labels = new[] { _name };
 
-        if (_options.EnableFocuserMetrics)
+        if (_options.EnableFocuserMetrics && deviceInfo.Connected)
         {
-            IsConnected.WithLabels(labels).Set(deviceInfo.Connected ? 1 : 0);
-            Temperature.WithLabels(labels).Set(deviceInfo.Temperature);
-            Position.WithLabels(labels).Set(deviceInfo.Position);
+            Temperature.WithLabels(labels).Set(Util.ReplaceNan(deviceInfo.Temperature));
+            Position.WithLabels(labels).Set(Util.ReplaceNan(deviceInfo.Position));
         }
         else
         {
-            IsConnected.WithLabels(labels).Unpublish();
             Temperature.WithLabels(labels).Unpublish();
             Position.WithLabels(labels).Unpublish();
         }

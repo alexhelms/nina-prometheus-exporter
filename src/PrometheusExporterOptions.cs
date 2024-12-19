@@ -9,12 +9,13 @@ namespace AlexHelms.NINA.PrometheusExporter;
 public class PrometheusExporterOptions : BaseINPC, IDisposable
 {
     private readonly IProfileService _profileService;
-    private readonly IPluginOptionsAccessor _options;
+    private readonly PluginOptionsAccessor _options;
 
     public PrometheusExporterOptions(IProfileService profileService)
     {
         _profileService = profileService;
         _profileService.ProfileChanged += ProfileService_ProfileChanged;
+        _profileService.ActiveProfile.PluginSettings.PropertyChanged += ProfileService_ProfileChanged;
 
         var guid = PluginOptionsAccessor.GetAssemblyGuid(typeof(PrometheusExporter));
         _options = new PluginOptionsAccessor(profileService, guid.Value);
@@ -24,6 +25,7 @@ public class PrometheusExporterOptions : BaseINPC, IDisposable
     {
         GC.SuppressFinalize(this);
         _profileService.ProfileChanged -= ProfileService_ProfileChanged;
+        _profileService.ActiveProfile.PluginSettings.PropertyChanged -= ProfileService_ProfileChanged;
     }
 
     private void ProfileService_ProfileChanged(object sender, EventArgs e)
@@ -96,6 +98,17 @@ public class PrometheusExporterOptions : BaseINPC, IDisposable
         set
         {
             _options.SetValueBoolean(nameof(EnableMountMetrics), value);
+            CoreUtil.SaveSettings(Settings.Default);
+            RaisePropertyChanged();
+        }
+    }
+
+    public bool EnableOtherMetrics
+    {
+        get => _options.GetValueBoolean(nameof(EnableOtherMetrics), true);
+        set
+        {
+            _options.SetValueBoolean(nameof(EnableOtherMetrics), value);
             CoreUtil.SaveSettings(Settings.Default);
             RaisePropertyChanged();
         }

@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("Alex Helms")]
 // The product name that this plugin is part of
 [assembly: AssemblyProduct("Prometheus Exporter")]
-[assembly: AssemblyCopyright("Copyright © 2023 Alex Helms")]
+[assembly: AssemblyCopyright("Copyright © 2023-2024 Alex Helms")]
 
 // The minimum Version of N.I.N.A. that this plugin is compatible with
 [assembly: AssemblyMetadata("MinimumApplicationVersion", "3.0.0.2017")]
@@ -50,18 +50,9 @@ using System.Runtime.InteropServices;
 //[Optional] An additional url to an example example screenshot of your plugin in action
 [assembly: AssemblyMetadata("AltScreenshotURL", "")]
 //[Optional] An in-depth description of your plugin
-[assembly: AssemblyMetadata("LongDescription", @"# Prometheus Exporter for NINA #
+[assembly: AssemblyMetadata("LongDescription", @"
+# Prometheus Exporter for NINA #
 Expose NINA metrics to prometheus.
-
-Due to technical limitations, .NET Framework requires system permissions to run HTTP servers.
-To use this plugin you first must run the command as as admin:
-
-```shell
-netsh http add urlacl url=http://+:9100/metrics user=%USERNAME%
-```
-
-Be sure to set the correct port and username.
-
 ")]
 
 

@@ -1,4 +1,6 @@
-﻿using NINA.Core.Utility;
+﻿using AlexHelms.NINA.Prometheusexporter;
+using AlexHelms.NINA.Prometheusexporter.NinaMetrics;
+using NINA.Core.Utility;
 using NINA.Core.Utility.Notification;
 using NINA.Equipment.Interfaces.Mediator;
 using NINA.Plugin;
@@ -9,6 +11,7 @@ using Prometheus;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
+using System.Threading;
 using System.Threading.Tasks;
 using Settings = AlexHelms.NINA.PrometheusExporter.Properties.Settings;
 
@@ -17,15 +20,18 @@ namespace AlexHelms.NINA.PrometheusExporter;
 [Export(typeof(IPluginManifest))]
 public class PrometheusExporter : PluginBase
 {
-    private readonly MetricServer _server;
+    private readonly MetricWebServer _server;
     private readonly CameraMetrics _cameraMetrics;
     private readonly FocuserMetrics _focuserMetrics;
     private readonly GuiderMetrics _guiderMetrics;
     private readonly ImageMetadataMetrics _imageMetadataMetrics;
     private readonly MountMetrics _mountMetrics;
+    private readonly OtherMetrics _otherMetrics;
     private readonly RotatorMetrics _rotatorMetrics;
     private readonly SafetyMetrics _safetyMetrics;
     private readonly WeatherMetrics _weatherMetrics;
+
+    private CancellationTokenSource _cts = new();
 
     public PrometheusExporterOptions Options { get; }
 
@@ -58,12 +64,13 @@ public class PrometheusExporter : PluginBase
             ["profile"] = Options.ProfileId,
         });
 
-        _server = new MetricServer(Options.Port);
+        _server = new MetricWebServer(Options.Port);
         _cameraMetrics = new CameraMetrics(camera, Options);
         _focuserMetrics = new FocuserMetrics(focuser, Options);
         _guiderMetrics = new GuiderMetrics(guider, Options);
         _imageMetadataMetrics = new ImageMetadataMetrics(images, Options);
         _mountMetrics = new MountMetrics(mount, Options);
+        _otherMetrics = new OtherMetrics(profileService, Options);
         _rotatorMetrics = new RotatorMetrics(rotator, Options);
         _safetyMetrics = new SafetyMetrics(safety, Options);
         _weatherMetrics = new WeatherMetrics(weather, Options);
@@ -74,6 +81,8 @@ public class PrometheusExporter : PluginBase
         try
         {
             _server.Start();
+
+            _ = Task.Run(() => _otherMetrics.Run(_cts.Token));
         }
         catch (Exception e)
         {
@@ -93,16 +102,20 @@ public class PrometheusExporter : PluginBase
 
     public override Task Teardown()
     {
+        _cts.Cancel();
+
         _server.Dispose();
         _cameraMetrics.Dispose();
         _focuserMetrics.Dispose();
         _guiderMetrics.Dispose();
         _imageMetadataMetrics.Dispose();
         _mountMetrics.Dispose();
+        _otherMetrics.Dispose();
         _rotatorMetrics.Dispose();
         _safetyMetrics.Dispose();
         _weatherMetrics.Dispose();
         Options.Dispose();
+        _cts.Dispose();
 
         return base.Teardown();
     }

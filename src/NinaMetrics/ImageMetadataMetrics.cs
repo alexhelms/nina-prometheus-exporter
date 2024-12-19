@@ -1,15 +1,16 @@
-﻿using NINA.WPF.Base.Interfaces.Mediator;
+﻿using AlexHelms.NINA.PrometheusExporter;
+using NINA.WPF.Base.Interfaces.Mediator;
 using Prometheus;
 using System;
 
-namespace AlexHelms.NINA.PrometheusExporter;
+namespace AlexHelms.NINA.Prometheusexporter.NinaMetrics;
 
 public class ImageMetadataMetrics : IDisposable
 {
     private readonly IImageSaveMediator _images;
     private readonly PrometheusExporterOptions _options;
 
-    private static readonly string[] Labels = new[] { "target_name", "filter" };
+    private static readonly string[] Labels = ["target_name", "filter"];
     private static readonly Gauge ImageScale = Metrics.CreateGauge("nina_image_scale", "Image scale in arcsec/px.", Labels);
     private static readonly Gauge ImageExposureTime = Metrics.CreateGauge("nina_image_exposure_time", "Image exposure time in seconds.", Labels);
     private static readonly Gauge ImageMean = Metrics.CreateGauge("nina_image_mean", "Image mean.", Labels);
@@ -47,24 +48,24 @@ public class ImageMetadataMetrics : IDisposable
 
         if (_options.EnableImageMetadataMetrics)
         {
-            var pixelSize = e.MetaData.Camera.PixelSize;
-            var focalLength = e.MetaData.Telescope.FocalLength;
-            var binning = int.Parse(e.MetaData.Image.Binning.Substring(0, 1));  // Binning is like "1x1" or "2x2", asymmetric not supported.
+            var pixelSize = Math.Max(0.1, e.MetaData.Camera.PixelSize);
+            var focalLength = Math.Max(1, e.MetaData.Telescope.FocalLength);
+            var binning = int.Parse(e.MetaData.Image.Binning[..1]);  // Binning is like "1x1" or "2x2", asymmetric not supported.
             var imageScale = pixelSize / focalLength * 57.29577951308 * 3600.0 / 1000.0 * binning;
 
-            ImageScale.WithLabels(labels).Set(imageScale);
-            ImageExposureTime.WithLabels(labels).Set(e.Duration);
+            ImageScale.WithLabels(labels).Set(Util.ReplaceNan(imageScale));
+            ImageExposureTime.WithLabels(labels).Set(Util.ReplaceNan(e.Duration));
 
             if (e.Statistics != null)
             {
-                ImageMean.WithLabels(labels).Set(e.Statistics.Mean);
-                ImageMedian.WithLabels(labels).Set(e.Statistics.Median);
-                ImageMAD.WithLabels(labels).Set(e.Statistics.MedianAbsoluteDeviation);
-                ImageStdDev.WithLabels(labels).Set(e.Statistics.StDev);
-                ImageMin.WithLabels(labels).Set(e.Statistics.Min);
-                ImageMinCount.WithLabels(labels).Set(e.Statistics.MinOccurrences);
-                ImageMax.WithLabels(labels).Set(e.Statistics.Max);
-                ImageMaxCount.WithLabels(labels).Set(e.Statistics.MaxOccurrences);
+                ImageMean.WithLabels(labels).Set(Util.ReplaceNan(e.Statistics.Mean));
+                ImageMedian.WithLabels(labels).Set(Util.ReplaceNan(e.Statistics.Median));
+                ImageMAD.WithLabels(labels).Set(Util.ReplaceNan(e.Statistics.MedianAbsoluteDeviation));
+                ImageStdDev.WithLabels(labels).Set(Util.ReplaceNan(e.Statistics.StDev));
+                ImageMin.WithLabels(labels).Set(Util.ReplaceNan(e.Statistics.Min));
+                ImageMinCount.WithLabels(labels).Set(Util.ReplaceNan(e.Statistics.MinOccurrences));
+                ImageMax.WithLabels(labels).Set(Util.ReplaceNan(e.Statistics.Max));
+                ImageMaxCount.WithLabels(labels).Set(Util.ReplaceNan(e.Statistics.MaxOccurrences));
             }
             else
             {
@@ -80,9 +81,9 @@ public class ImageMetadataMetrics : IDisposable
 
             if (e.StarDetectionAnalysis != null)
             {
-                ImageHfr.WithLabels(labels).Set(e.StarDetectionAnalysis.HFR);
-                ImageHfrStdDev.WithLabels(labels).Set(e.StarDetectionAnalysis.HFRStDev);
-                ImageStarCount.WithLabels(labels).Set(e.StarDetectionAnalysis.DetectedStars);
+                ImageHfr.WithLabels(labels).Set(Util.ReplaceNan(e.StarDetectionAnalysis.HFR));
+                ImageHfrStdDev.WithLabels(labels).Set(Util.ReplaceNan(e.StarDetectionAnalysis.HFRStDev));
+                ImageStarCount.WithLabels(labels).Set(Util.ReplaceNan(e.StarDetectionAnalysis.DetectedStars));
             }
             else
             {
@@ -93,6 +94,7 @@ public class ImageMetadataMetrics : IDisposable
         }
         else
         {
+            ImageScale.WithLabels(labels).Unpublish();
             ImageExposureTime.WithLabels(labels).Unpublish();
             ImageMean.WithLabels(labels).Unpublish();
             ImageMedian.WithLabels(labels).Unpublish();
