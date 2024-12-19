@@ -12,7 +12,7 @@ public class GuiderMetrics : IGuiderConsumer
     private readonly IGuiderMediator _guider;
     private readonly PrometheusExporterOptions _options;
 
-    private static readonly Gauge RaErrorArcsec = Metrics.CreateGauge("nina_guider__ra_arcsec", "Guider RA error in arcsec.");
+    private static readonly Gauge RaErrorArcsec = Metrics.CreateGauge("nina_guider_ra_arcsec", "Guider RA error in arcsec.");
     private static readonly Gauge DecErrorArcsec = Metrics.CreateGauge("nina_guider_dec_arcsec", "Guider DEC error in arcsec.");
     private static readonly Gauge TotalErrorArcsec = Metrics.CreateGauge("nina_guider_total_arcsec", "Guider total error in arcsec.");
 
